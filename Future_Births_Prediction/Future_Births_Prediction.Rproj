@@ -1,0 +1,55 @@
+install.packages("rJava")
+install.packages("XLConnect")
+install.packages("ggplot2")
+install.packages("forecast")
+install.packages("TSA")
+install.packages("imputeTS")
+install.packages("fpp") 
+install.packages("stats") 
+library(TSA)
+library(ggplot2)
+library(forecast)
+library(fpp2)
+library(rJava)
+library(XLConnect)
+library(imputeTS)
+library(fpp)
+library(stats)
+library(haven)
+
+
+births <- scan("http://robjhyndman.com/tsdldata/data/nybirths.dat")
+birthstimeseries <- ts(births, frequency=12, start=c(1946,1))
+birthstimeseries
+ts.plot(birthstimeseries,gpars=list(xlab="Zaman", ylab="Births"), lwd=1)
+Acf(birthstimeseries,lag.max = 42,  ylim=c(-1,1), lwd=3)
+Pacf(birthstimeseries,lag.max = 42, ylim=c(-1,1), lwd=3)
+Acf(diff(birthstimeseries),lag.max = 42, ylim=c(-1,1), lwd=3)
+Pacf(diff(birthstimeseries),lag.max = 42, ylim=c(-1,1), lwd=3)
+Acf(diff(diff(birthstimeseries)),lag.max = 42, ylim=c(-1,1), lwd=3)
+Pacf(diff(diff(birthstimeseries)),lag.max = 42, ylim=c(-1,1), lwd=3)
+
+HOLT
+
+
+HoltWinters1<- ets(birthstimeseries, model = "ZZZ") 
+summary(HoltWinters1)
+
+tahmin1<- HoltWinters1[["fitted"]]
+plot( window(birthstimeseries), 
+      xlab="Zaman (Yıl)", ylab="",lty=1, col=4, lwd=1.5)
+lines( window(tahmin1) ,lty=3,col=2,lwd=1.5)
+legend("topleft",c(expression(paste(Orjinalseri)),
+                   expression(paste(HoltWinters1Tahmin))),
+       lwd=c(2,2),lty=c(1,3), cex=0.7, col=c(4,2))
+hata1<- HoltWinters1[["residuals"]] 
+Box.test (hata1, lag = 42, type = "Ljung")
+
+Acf(hata1,main="Hata", lag.max = 42,  ylim=c(-1,1), lwd=3)
+Pacf(hata1,main="Hata",lag.max = 42, ylim=c(-1,1), lwd=3)
+checkresiduals(HoltWinters1, lag = 42) 
+ongoru1 <- forecast(HoltWinters1,h=5) 
+ongoru1[["mean"]]
+
+
+
